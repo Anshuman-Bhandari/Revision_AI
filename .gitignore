@@ -80,3 +80,5 @@ chroma_db/
 
 # Ollama local files (optional, if stored in project)
 ollama/
+
+walkthrough.md
