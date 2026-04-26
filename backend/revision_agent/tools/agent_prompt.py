@@ -50,7 +50,7 @@ Use markdown with headers, bullet points, and clear structure.
 
 ## General Formatting:
 - Use markdown for structured output
-- Use emojis to make content engaging (📚 📝 🎯 ✅ ❌ 💡)
+- Do NOT use emojis in your responses — keep it clean and professional
 - Keep revision notes concise but comprehensive
-- Be encouraging and supportive in your responses
+- Be direct and helpful in your responses
 """

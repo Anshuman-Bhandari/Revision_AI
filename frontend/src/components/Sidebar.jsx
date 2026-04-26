@@ -30,15 +30,14 @@ export default function Sidebar({
     <aside className="sidebar">
       {/* Brand */}
       <div className="sidebar-brand">
-        <span className="brand-icon">📚</span>
         <h2>RevisionAI</h2>
-        <p>Your Smart Study Companion</p>
+        <p>Your study companion</p>
       </div>
 
       {/* Upload Section */}
-      <div className="sidebar-section-label">📄 Upload Notes</div>
+      <div className="sidebar-section-label">Upload Notes</div>
       <div className="upload-area">
-        <span className="upload-icon">📁</span>
+        <span className="upload-icon">+</span>
         <p>Drop your PDF notes here</p>
         <p className="upload-hint">or click to browse</p>
         <input
@@ -60,12 +59,12 @@ export default function Sidebar({
             <span className="spinner"></span> Processing...
           </>
         ) : (
-          "🚀 Process Documents"
+          "Process Documents"
         )}
       </button>
 
       {/* Document Status */}
-      <div className="sidebar-section-label">📊 Document Status</div>
+      <div className="sidebar-section-label">Document Status</div>
       <div className="status-card">
         <div className="count">{docStatus.chunk_count}</div>
         <div className="label">chunks in knowledge base</div>
@@ -74,32 +73,32 @@ export default function Sidebar({
       {docStatus.files && docStatus.files.length > 0 && (
         <ul className="file-list">
           {docStatus.files.map((name, i) => (
-            <li key={i}>📄 {name}</li>
+            <li key={i}>{name}</li>
           ))}
         </ul>
       )}
 
       {/* Quick Actions */}
-      <div className="sidebar-section-label">⚡ Quick Actions</div>
+      <div className="sidebar-section-label">Quick Actions</div>
       <div className="quick-actions">
         <button className="btn-action" onClick={() => onQuickAction("revision")}>
-          📝 Revision
+          Revision
         </button>
         <button className="btn-action" onClick={() => onQuickAction("flashcards")}>
-          🃏 Flashcards
+          Flashcards
         </button>
         <button className="btn-action" onClick={() => onQuickAction("quiz")}>
-          📋 Quiz
+          Quiz
         </button>
         <button className="btn-action" onClick={onClearChat}>
-          🗑️ Clear Chat
+          Clear Chat
         </button>
       </div>
 
       {/* Settings */}
-      <div className="sidebar-section-label">🔧 Settings</div>
+      <div className="sidebar-section-label">Settings</div>
       <button className="btn-action btn-danger" onClick={onClearKnowledgeBase}>
-        🗑️ Clear Knowledge Base
+        Clear Knowledge Base
       </button>
     </aside>
   );

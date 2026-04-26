@@ -2,7 +2,7 @@ import { useState } from "react";
 
 /**
  * QuizBlock — Renders MCQ questions with clickable options.
- * Green highlight for correct, red for wrong. Score tracked at bottom.
+ * Highlights correct/wrong answers. Score tracked at bottom.
  *
  * Props:
  *   questions: Array of { question, options: [{ letter, text }], answer: "A"|"B"|"C"|"D" }
@@ -66,7 +66,7 @@ export default function QuizBlock({ questions }) {
           </span>
           <p>
             {totalAnswered === questions.length
-              ? "Quiz complete! 🎉"
+              ? "Quiz complete"
               : `${questions.length - totalAnswered} question(s) remaining`}
           </p>
         </div>
