@@ -83,9 +83,9 @@ function parseQuiz(text) {
     // Check for question start: "1. Question text" or "1) Question text"
     // Must NOT start with A-D (those are options)
     const qMatch = trimmed.match(
-      /^(?:\*{0,2})(\d+)[\.\)]\s*(?:\*{0,2})(.*?)(?:\*{0,2})$/
+      /^(?:\*{0,2})(\d+)[\.\\)]\s*(?:\*{0,2})(.*?)(?:\*{0,2})$/
     );
-    if (qMatch && !trimmed.match(/^[A-D][\.\)]/i)) {
+    if (qMatch && !trimmed.match(/^[A-D][\.\\)]/i)) {
       // Save previous question
       if (current && current.options.length >= 2 && current.answer) {
         questions.push(current);
@@ -101,7 +101,7 @@ function parseQuiz(text) {
 
     if (current) {
       // Check for option: "A. text" or "A) text"
-      const optMatch = trimmed.match(/^([A-D])[\.\)]\s*(.+)/i);
+      const optMatch = trimmed.match(/^([A-D])[\.\\)]\s*(.+)/i);
       if (optMatch) {
         current.options.push({
           letter: optMatch[1].toUpperCase(),
@@ -155,7 +155,7 @@ export default function MessageBubble({ role, content }) {
     if (quizData && quizData.questions.length >= 2) {
       return (
         <div className={`message-row ${role}`}>
-          <div className="message-avatar">{isUser ? "🧑‍🎓" : "🤖"}</div>
+          <div className="message-avatar">{isUser ? "You" : "AI"}</div>
           <div className="message-bubble">
             {quizData.remainingText && (
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -179,7 +179,7 @@ export default function MessageBubble({ role, content }) {
 
       return (
         <div className={`message-row ${role}`}>
-          <div className="message-avatar">{isUser ? "🧑‍🎓" : "🤖"}</div>
+          <div className="message-avatar">{isUser ? "You" : "AI"}</div>
           <div className="message-bubble">
             {flashcardData.remainingText && (
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -198,7 +198,7 @@ export default function MessageBubble({ role, content }) {
   // Default: render as markdown
   return (
     <div className={`message-row ${role}`}>
-      <div className="message-avatar">{isUser ? "🧑‍🎓" : "🤖"}</div>
+      <div className="message-avatar">{isUser ? "You" : "AI"}</div>
       <div className="message-bubble">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
       </div>

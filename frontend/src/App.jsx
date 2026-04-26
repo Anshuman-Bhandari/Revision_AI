@@ -54,7 +54,7 @@ export default function App() {
           err.response?.data?.detail || "Failed to get a response. Is the backend running?";
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: `❌ **Error**: ${detail}` },
+          { role: "assistant", content: `**Error**: ${detail}` },
         ]);
       } finally {
         setLoading(false);
@@ -72,11 +72,11 @@ export default function App() {
         const status = await getDocumentStatus();
         setDocStatus(status);
         showToast(
-          `✅ ${result.files_processed.length} file(s) → ${result.chunks_stored} chunks stored!`
+          `${result.files_processed.length} file(s) processed — ${result.chunks_stored} chunks stored`
         );
       } catch (err) {
         const detail = err.response?.data?.detail || "Upload failed";
-        showToast(`❌ ${detail}`, "error");
+        showToast(detail, "error");
       } finally {
         setUploading(false);
       }

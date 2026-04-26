@@ -31,47 +31,43 @@ export default function ChatArea({
     <div className="chat-area">
       {/* Header */}
       <div className="chat-header">
-        <h1>📚 RevisionAI</h1>
-        <p>Upload your notes → Ask questions → Ace your exams! 🎯</p>
+        <h1>RevisionAI</h1>
+        <p>Upload your notes, ask questions, ace your exams.</p>
       </div>
 
       {/* Messages */}
       <div className="messages-container">
         {messages.length === 0 ? (
           <div className="welcome-message">
-            <span className="welcome-icon">📚</span>
             {docCount > 0 ? (
               <>
-                <h2>Welcome back! 👋</h2>
+                <h2>Welcome back</h2>
                 <p>
                   Your notes are loaded and ready. I can help you with revision
-                  notes, flashcards, or quizzes. Just type what you need or use
-                  the Quick Actions in the sidebar!
+                  notes, flashcards, or quizzes. Type what you need or use
+                  the Quick Actions in the sidebar.
                 </p>
               </>
             ) : (
               <>
-                <h2>Welcome to RevisionAI! 👋</h2>
+                <h2>Welcome to RevisionAI</h2>
                 <p>
-                  I'm your AI study companion. Upload your PDF notes using the
+                  Your AI study companion. Upload your PDF notes using the
                   sidebar, then ask me to create revision notes, flashcards, or
-                  quizzes!
+                  quizzes.
                 </p>
               </>
             )}
             <div className="welcome-features">
               <div className="welcome-feature">
-                <span className="feat-icon">📝</span>
                 <div className="feat-title">Revision Notes</div>
                 <div className="feat-desc">Topic summaries</div>
               </div>
               <div className="welcome-feature">
-                <span className="feat-icon">🃏</span>
                 <div className="feat-title">Flashcards</div>
                 <div className="feat-desc">Flip to learn</div>
               </div>
               <div className="welcome-feature">
-                <span className="feat-icon">📋</span>
                 <div className="feat-title">Quiz</div>
                 <div className="feat-desc">Test yourself</div>
               </div>
@@ -86,7 +82,7 @@ export default function ChatArea({
         {/* Loading indicator */}
         {loading && (
           <div className="message-row assistant">
-            <div className="message-avatar">🤖</div>
+            <div className="message-avatar">AI</div>
             <div className="message-bubble">
               <div className="loading-dots">
                 <span></span>
@@ -106,11 +102,11 @@ export default function ChatArea({
           <input
             ref={inputRef}
             type="text"
-            placeholder="Ask me anything about your notes... 💬"
+            placeholder="Ask me anything about your notes..."
             disabled={loading}
           />
           <button className="btn-send" type="submit" disabled={loading}>
-            ➤
+            &#x2192;
           </button>
         </form>
       </div>

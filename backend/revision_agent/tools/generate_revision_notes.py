@@ -28,5 +28,5 @@ def generate_revision_notes(topic: str) -> dict:
         "status": "success",
         "topic": topic,
         "context": "\n\n".join(context_parts),
-        "instruction": "Create a well-structured revision summary using ONLY the provided context. Include key points, definitions, and important facts. Use bullet points and headers for clarity. Do NOT add information from your general knowledge into the main summary. If you want to add extra context, put it in a clearly separated '💡 Extra Details' section at the very end."
+        "instruction": "Create a well-structured revision summary using ONLY the provided context. Include key points, definitions, and important facts. Use bullet points and headers for clarity. Do NOT add information from your general knowledge into the main summary. If you want to add extra context, put it in a clearly separated 'Extra Details' section at the very end."
     }
