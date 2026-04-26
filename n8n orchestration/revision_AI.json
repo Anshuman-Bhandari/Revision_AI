@@ -1,37 +1,64 @@
 {
-  "name": "revision_AI",
+  "name": "RevisionAI — Exam Revision Assistant",
   "nodes": [
     {
       "parameters": {
         "options": {
-          "allowFileUploads": true
+          "allowFileUploads": true,
+          "allowedFileTypes": ".pdf"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.4,
-      "position": [
-        -1040,
-        16
-      ],
-      "id": "3e1a8770-f33d-4ae2-8729-d509cb13de0a",
-      "name": "When chat message received",
-      "webhookId": "7b273737-e94e-48aa-8f44-b1fb0438053b"
+      "position": [-1200, 0],
+      "id": "a1000001-0000-0000-0000-000000000001",
+      "name": "Chat Trigger — User Message",
+      "webhookId": "rev-ai-chat-trigger-001"
     },
     {
       "parameters": {
-        "dataType": "binary",
-        "loader": "pdfLoader",
-        "textSplittingMode": "custom",
+        "path": "revision-ai-webhook",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-1200, -300],
+      "id": "a1000001-0000-0000-0000-000000000002",
+      "name": "Webhook — API Endpoint",
+      "webhookId": "rev-ai-webhook-001"
+    },
+    {
+      "parameters": {
+        "formTitle": "📚 RevisionAI — Upload Study Notes",
+        "formDescription": "Upload your PDF notes to get AI-powered revision summaries, flashcards, and MCQ quizzes. Your notes are processed locally and used as the sole knowledge source.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload Notes PDF",
+              "fieldType": "file",
+              "fieldName": "notesPdf",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Question (optional)",
+              "fieldName": "userQuery",
+              "placeholder": "e.g. Create revision notes on Chapter 3..."
+            }
+          ]
+        },
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
-      "typeVersion": 1.1,
-      "position": [
-        -208,
-        -48
-      ],
-      "id": "45600cf4-3e2a-4602-bce7-336b060686ed",
-      "name": "Default Data Loader"
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [-1200, 300],
+      "id": "a1000001-0000-0000-0000-000000000003",
+      "name": "Form Trigger — Upload Notes",
+      "webhookId": "rev-ai-form-001"
     },
     {
       "parameters": {
@@ -44,293 +71,523 @@
           },
           "conditions": [
             {
-              "leftValue": "={{ Object.keys($binary).length }}",
+              "leftValue": "={{ $binary ? Object.keys($binary).length : 0 }}",
               "rightValue": 0,
               "operator": {
                 "type": "number",
                 "operation": "gt"
               },
-              "id": "10963d72-e736-48d1-8f6f-947003f672cc"
+              "id": "cond-file-check-001"
             }
           ],
           "combinator": "and"
         },
         "options": {}
       },
-      "id": "6c6c47ef-3a39-462a-9630-afff9752dcc9",
-      "name": "Check If File Uploaded",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [
-        -672,
-        16
-      ]
+      "position": [-800, 0],
+      "id": "a1000001-0000-0000-0000-000000000004",
+      "name": "Check — PDF Uploaded?"
     },
     {
       "parameters": {
+        "dataType": "binary",
+        "loader": "pdfLoader",
+        "textSplittingMode": "custom",
         "options": {}
       },
-      "id": "e2492f34-7aa2-4d45-8c0e-e3a931dcbb2d",
-      "name": "Embeddings (Insert)",
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
-      "typeVersion": 1.2,
-      "position": [
-        -416,
-        -64
-      ],
-      "credentials": {
-        "openAiApi": {
-          "id": "0VlXpIrU9rh7P7h3",
-          "name": "n8n free OpenAI API credits"
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [-200, -200],
+      "id": "a1000001-0000-0000-0000-000000000005",
+      "name": "PDF Loader — Extract Text"
+    },
+    {
+      "parameters": {
+        "chunkSize": 1000,
+        "chunkOverlap": 200,
+        "options": {
+          "keepSeparator": true
         }
-      }
-    },
-    {
-      "parameters": {
-        "chunkSize": 900,
-        "chunkOverlap": 150,
-        "options": {}
       },
-      "id": "1a3e48be-5c98-48ae-8e6f-6c98fb9481da",
-      "name": "Recursive Character Text Splitter",
       "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
       "typeVersion": 1,
-      "position": [
-        -272,
-        112
-      ]
+      "position": [-200, -40],
+      "id": "a1000001-0000-0000-0000-000000000006",
+      "name": "Text Splitter — 1000 chars / 200 overlap"
     },
     {
       "parameters": {
-        "formTitle": "Upload Your Study Notes",
-        "formDescription": "Upload your notes or syllabus PDF to get started with AI-powered revision assistance",
-        "formFields": {
-          "values": [
-            {
-              "fieldLabel": "Upload Notes PDF",
-              "fieldType": "file",
-              "fieldName": "notesPdf",
-              "acceptFileTypes": ".pdf"
-            },
-            {
-              "fieldLabel": "Ask query"
-            }
-          ]
-        },
+        "model": "qwen2.5:0.5b",
+        "baseUrl": "http://localhost:11434",
         "options": {}
       },
-      "id": "04fbf9c9-58e2-4cae-a2d2-0d18d7b14f2c",
-      "name": "Form - Upload Notes",
-      "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.5,
-      "position": [
-        -1040,
-        256
-      ],
-      "webhookId": "f4eb5305-f9cf-4e1d-bc96-127f3d616fb2"
-    },
-    {
-      "parameters": {
-        "operation": "completion",
-        "completionTitle": "Notes Uploaded Successfully!",
-        "completionMessage": "={{ $json.document.pageContent }}",
-        "options": {}
-      },
-      "id": "3678f38b-3b71-4465-8ea8-0f4a48548179",
-      "name": "Form Completion",
-      "type": "n8n-nodes-base.form",
-      "typeVersion": 2.5,
-      "position": [
-        240,
-        32
-      ],
-      "webhookId": "52ed8955-615c-4976-b299-7215299998c8"
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [-460, -200],
+      "id": "a1000001-0000-0000-0000-000000000007",
+      "name": "Ollama Embeddings — Insert (qwen2.5:0.5b)"
     },
     {
       "parameters": {
         "mode": "insert",
-        "memoryKey": {
+        "qdrantCollection": {
           "__rl": true,
           "mode": "list",
-          "value": "vector_store_key"
-        }
-      },
-      "id": "4fa4c751-5383-4f63-8f97-803b14fa84de",
-      "name": "Insert Into Vector Store",
-      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-      "typeVersion": 1.3,
-      "position": [
-        -368,
-        -272
-      ]
-    },
-    {
-      "parameters": {
-        "mode": "load",
-        "memoryKey": {
-          "__rl": true,
-          "mode": "list",
-          "value": "vector_store_key"
+          "value": "revision_notes"
         },
-        "prompt": "get the required data asked by the user "
-      },
-      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-      "typeVersion": 1.3,
-      "position": [
-        -352,
-        304
-      ],
-      "id": "92c6ed0a-341b-4ee9-b2bd-2818b53b36b6",
-      "name": "Simple Vector Store"
-    },
-    {
-      "parameters": {
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
-      "typeVersion": 1.2,
-      "position": [
-        -352,
-        496
-      ],
-      "id": "8dfbfb97-f60e-400a-bab3-77f3b0440261",
-      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [-460, -400],
+      "id": "a1000001-0000-0000-0000-000000000008",
+      "name": "Vector Store — Insert into ChromaDB"
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "completionTitle": "✅ Notes Processed Successfully!",
+        "completionMessage": "Your PDF has been processed and stored. You can now ask questions about your notes using the chat interface.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.5,
+      "position": [200, -400],
+      "id": "a1000001-0000-0000-0000-000000000009",
+      "name": "Response — Upload Success"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput || $json.userQuery || $json.body?.query || '' }}",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "You are **RevisionAI**, an intelligent exam revision assistant.\nYour job is to help students study effectively using ONLY their uploaded notes and documents.\n\n## Your Capabilities:\n1. **Revision Notes** — Create brief, well-structured topic summaries\n2. **Flashcards** — Generate Q&A pairs for quick review\n3. **Quiz** — Create MCQ tests to assess understanding\n\n## CRITICAL RULES (MUST FOLLOW STRICTLY):\n- ALWAYS use the provided tools to search the uploaded notes BEFORE answering any question.\n- Your MAIN response body must contain ONLY information that is directly found in the uploaded documents / retrieved context. Do NOT blend your own general knowledge into the main answer.\n- If the retrieved context does not contain enough information to answer the question, say so clearly: \"Your uploaded notes do not cover this topic in detail.\"\n- If no documents are uploaded, politely ask the user to upload their notes first.\n- Do NOT paraphrase beyond what the documents say in the main answer. Stay faithful to the source material.\n\n## Response Structure (MANDATORY):\nEvery response MUST follow this two-part structure:\n\n### Part 1 — Main Answer (FROM YOUR NOTES ONLY)\n- This section contains ONLY information extracted from the uploaded documents.\n- Clearly attribute content to the user's notes.\n- If the notes don't cover the topic, explicitly state that.\n\n### Part 2 — 💡 Extra Details (optional, at the very end)\n- ONLY after completing the main answer, you MAY add a small section titled \"💡 Extra Details\" at the very end.\n- This section contains supplementary information from your general knowledge.\n- Keep this section brief (2-4 bullet points max).\n- Clearly label it so the student knows this is NOT from their notes.\n- If the notes already cover the topic comprehensively, SKIP this section entirely.\n\n## How to respond:\n- For **revision requests**: Use search_notes tool, then create a clear summary. Add extra details at the end if helpful.\n- For **flashcard requests**: Use search_notes tool, then format as clean Q&A pairs with emoji cards (🃏).\n- For **quiz requests**: Use search_notes tool, then present well-formatted MCQ questions.\n- For **general questions**: Use search_notes tool to find relevant info, then answer based strictly on the notes.\n\n## Formatting:\n- Use markdown for structured output\n- Use emojis to make content engaging (📚 📝 🎯 ✅ ❌ 💡)\n- Keep revision notes concise but comprehensive\n- Number all quiz questions and clearly mark options A/B/C/D\n- Always separate the \"💡 Extra Details\" section with a horizontal rule (---) before it\n\nBe encouraging and supportive in your responses.",
+          "maxIterations": 10,
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [-400, 200],
+      "id": "a1000001-0000-0000-0000-000000000010",
+      "name": "AI Agent — RevisionAI (Gemini)"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite",
+        "options": {
+          "temperature": 0.7,
+          "topP": 0.9
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [-600, 400],
+      "id": "a1000001-0000-0000-0000-000000000011",
+      "name": "Gemini 2.0 Flash Lite",
       "credentials": {
-        "openAiApi": {
-          "id": "0VlXpIrU9rh7P7h3",
-          "name": "n8n free OpenAI API credits"
+        "googleGeminiApi": {
+          "id": "google-gemini-cred-001",
+          "name": "Google Gemini API Key"
         }
       }
     },
     {
       "parameters": {
-        "path": "0f9000ff-f7ab-44d1-943e-347a5c24827a",
+        "name": "search_notes",
+        "description": "Search the uploaded study notes for information relevant to a query. Use this tool whenever you need to find specific content from the user's uploaded documents. Returns up to 5 matching chunks from the vector store with source metadata.",
+        "mode": "retrieve-as-tool",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "revision_notes"
+        },
+        "topK": 5,
         "options": {}
       },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [
-        -1040,
-        -224
-      ],
-      "id": "6c731e53-a138-4cbd-84a1-79d602fd6011",
-      "name": "Webhook",
-      "webhookId": "0f9000ff-f7ab-44d1-943e-347a5c24827a"
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [-200, 400],
+      "id": "a1000001-0000-0000-0000-000000000012",
+      "name": "Tool — search_notes (Vector Store)"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:0.5b",
+        "baseUrl": "http://localhost:11434",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [-200, 580],
+      "id": "a1000001-0000-0000-0000-000000000013",
+      "name": "Ollama Embeddings — Query (qwen2.5:0.5b)"
+    },
+    {
+      "parameters": {
+        "name": "generate_revision_notes",
+        "description": "Generate structured revision notes for a specific topic. Searches the uploaded notes and returns up to 7 relevant chunks that should be used to create a brief, organized summary. The agent must create a well-structured revision summary using ONLY the provided context, including key points, definitions, and important facts with bullet points and headers.",
+        "mode": "retrieve-as-tool",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "revision_notes"
+        },
+        "topK": 7,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [0, 400],
+      "id": "a1000001-0000-0000-0000-000000000014",
+      "name": "Tool — generate_revision_notes"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:0.5b",
+        "baseUrl": "http://localhost:11434",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [0, 580],
+      "id": "a1000001-0000-0000-0000-000000000015",
+      "name": "Ollama Embeddings — Revision"
+    },
+    {
+      "parameters": {
+        "name": "generate_flashcards",
+        "description": "Generate flashcard content for quick review on a specific topic. Searches uploaded notes and returns up to 7 relevant chunks to create Q&A flashcard pairs. The agent should create 8-12 flashcards formatted as 'Q: ... A: ...' using ONLY the retrieved context.",
+        "mode": "retrieve-as-tool",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "revision_notes"
+        },
+        "topK": 7,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [200, 400],
+      "id": "a1000001-0000-0000-0000-000000000016",
+      "name": "Tool — generate_flashcards"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:0.5b",
+        "baseUrl": "http://localhost:11434",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [200, 580],
+      "id": "a1000001-0000-0000-0000-000000000017",
+      "name": "Ollama Embeddings — Flashcards"
+    },
+    {
+      "parameters": {
+        "name": "generate_quiz",
+        "description": "Generate MCQ quiz questions for testing knowledge on a specific topic. Searches uploaded notes and returns up to 7 relevant chunks to create multiple choice questions. The agent should create exactly 5 MCQ questions with 4 options (A, B, C, D) each, with one correct answer, followed by an answer key. All questions must come strictly from the provided context.",
+        "mode": "retrieve-as-tool",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "revision_notes"
+        },
+        "topK": 7,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [400, 400],
+      "id": "a1000001-0000-0000-0000-000000000018",
+      "name": "Tool — generate_quiz"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:0.5b",
+        "baseUrl": "http://localhost:11434",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "typeVersion": 1,
+      "position": [400, 580],
+      "id": "a1000001-0000-0000-0000-000000000019",
+      "name": "Ollama Embeddings — Quiz"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "revision_session",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [-600, 580],
+      "id": "a1000001-0000-0000-0000-000000000020",
+      "name": "Chat Memory — Session Buffer"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [200, -300],
+      "id": "a1000001-0000-0000-0000-000000000021",
+      "name": "Respond — Webhook Output"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Error handler — mirrors app.py error handling\nconst errorMsg = $json.error?.message || $json.errorMessage || 'Unknown error';\n\nlet userMessage = '';\n\nif (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED')) {\n  userMessage = '⚠️ **API Quota Exceeded**: The Gemini API free tier limit has been reached. Please wait a few minutes and try again, or upgrade your API plan.';\n} else if (errorMsg.includes('401') || errorMsg.includes('UNAUTHENTICATED')) {\n  userMessage = '🔑 **Authentication Error**: Please check your Google API Key in n8n credentials.';\n} else {\n  userMessage = `❌ **Error**: ${errorMsg}`;\n}\n\nreturn [{ json: { output: userMessage } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, 200],
+      "id": "a1000001-0000-0000-0000-000000000022",
+      "name": "Error Handler",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-600, -100],
+      "id": "a1000001-0000-0000-0000-000000000023",
+      "name": "Merge Triggers",
+      "notesInFlow": true,
+      "notes": "Merges Chat, Webhook, and Form trigger inputs into a unified pipeline"
     }
   ],
   "pinData": {},
   "connections": {
-    "When chat message received": {
+    "Chat Trigger — User Message": {
       "main": [
         [
           {
-            "node": "Check If File Uploaded",
+            "node": "Merge Triggers",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Default Data Loader": {
-      "ai_document": [
+    "Webhook — API Endpoint": {
+      "main": [
         [
           {
-            "node": "Insert Into Vector Store",
-            "type": "ai_document",
+            "node": "Merge Triggers",
+            "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Check If File Uploaded": {
+    "Form Trigger — Upload Notes": {
       "main": [
         [
           {
-            "node": "Insert Into Vector Store",
+            "node": "Merge Triggers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Triggers": {
+      "main": [
+        [
+          {
+            "node": "Check — PDF Uploaded?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check — PDF Uploaded?": {
+      "main": [
+        [
+          {
+            "node": "Vector Store — Insert into ChromaDB",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Simple Vector Store",
+            "node": "AI Agent — RevisionAI (Gemini)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Embeddings (Insert)": {
-      "ai_embedding": [
+    "PDF Loader — Extract Text": {
+      "ai_document": [
         [
           {
-            "node": "Insert Into Vector Store",
-            "type": "ai_embedding",
+            "node": "Vector Store — Insert into ChromaDB",
+            "type": "ai_document",
             "index": 0
           }
         ]
       ]
     },
-    "Recursive Character Text Splitter": {
+    "Text Splitter — 1000 chars / 200 overlap": {
       "ai_textSplitter": [
         [
           {
-            "node": "Default Data Loader",
+            "node": "PDF Loader — Extract Text",
             "type": "ai_textSplitter",
             "index": 0
           }
         ]
       ]
     },
-    "Form - Upload Notes": {
-      "main": [
-        [
-          {
-            "node": "Check If File Uploaded",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Insert Into Vector Store": {
-      "main": [
-        [
-          {
-            "node": "Form Completion",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Vector Store": {
-      "main": [
-        [
-          {
-            "node": "Form Completion",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Embeddings OpenAI": {
+    "Ollama Embeddings — Insert (qwen2.5:0.5b)": {
       "ai_embedding": [
         [
           {
-            "node": "Simple Vector Store",
+            "node": "Vector Store — Insert into ChromaDB",
             "type": "ai_embedding",
             "index": 0
           }
         ]
       ]
     },
-    "Webhook": {
+    "Vector Store — Insert into ChromaDB": {
       "main": [
         [
           {
-            "node": "Check If File Uploaded",
+            "node": "Response — Upload Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini 2.0 Flash Lite": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent — RevisionAI (Gemini)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool — search_notes (Vector Store)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent — RevisionAI (Gemini)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Embeddings — Query (qwen2.5:0.5b)": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Tool — search_notes (Vector Store)",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool — generate_revision_notes": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent — RevisionAI (Gemini)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Embeddings — Revision": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Tool — generate_revision_notes",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool — generate_flashcards": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent — RevisionAI (Gemini)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Embeddings — Flashcards": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Tool — generate_flashcards",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tool — generate_quiz": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent — RevisionAI (Gemini)",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Embeddings — Quiz": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Tool — generate_quiz",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory — Session Buffer": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent — RevisionAI (Gemini)",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent — RevisionAI (Gemini)": {
+      "main": [
+        [
+          {
+            "node": "Respond — Webhook Output",
             "type": "main",
             "index": 0
           }
@@ -341,13 +598,29 @@
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "errorWorkflow": "",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "c677f9d9-2fba-47d2-b059-5c11a1094412",
+  "versionId": "rev-ai-v2-2026-04-23",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c36c768ac0206512697662ddc024e4a936008998762c95e8ab50551a650ceef1"
   },
-  "id": "J49cLgpJeE0MHxx9",
-  "tags": []
+  "id": "RevisionAI-Orchestration-v2",
+  "tags": [
+    {
+      "name": "AI",
+      "id": "tag-ai-001"
+    },
+    {
+      "name": "RAG",
+      "id": "tag-rag-001"
+    },
+    {
+      "name": "Education",
+      "id": "tag-edu-001"
+    }
+  ]
 }
